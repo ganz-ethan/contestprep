@@ -22,7 +22,7 @@ To publish a change: edit, bump the `?v=` number in `index.html`, then
 git add -A && git commit -m "describe the change" && git push
 ```
 
-GitHub Pages rebuilds in under a minute.
+GitHub Pages rebuilds in under a minute. If `git push` asks for a username, run `gh auth setup-git` once (it lets git use your GitHub CLI login), then push again.
 
 ## Put it online for free
 
