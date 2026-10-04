@@ -1,0 +1,5 @@
+﻿dist/
+.netlify/
+node_modules/
+collector/responses.csv
+*.log
