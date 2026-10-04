@@ -12,6 +12,18 @@ python -m http.server 8430
 
 Then open <http://localhost:8430>. (Any static file server works. Opening `index.html` directly also works for most pages.)
 
+## Live site
+
+**https://ganz-ethan.github.io/contestprep/** (GitHub Pages, served from the `main` branch root of <https://github.com/ganz-ethan/contestprep>).
+
+To publish a change: edit, bump the `?v=` number in `index.html`, then
+
+```bash
+git add -A && git commit -m "describe the change" && git push
+```
+
+GitHub Pages rebuilds in under a minute.
+
 ## Put it online for free
 
 It is just files, so any static host works:
