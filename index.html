@@ -16,7 +16,7 @@
   <script>try{var th=localStorage.getItem("cp.theme");if(th)document.documentElement.setAttribute("data-theme",th)}catch(e){}</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232557d6'/%3E%3Ctext x='32' y='46' font-size='40' font-family='Georgia,serif' text-anchor='middle' fill='white'%3E%CF%80%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
   <a class="skip" href="#app" onclick="document.getElementById('app').focus()">Skip to content</a>
@@ -43,18 +43,19 @@
 
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-  <script defer src="config.js?v=15"></script>
-  <script defer src="problems.js?v=15"></script>
-  <script defer src="problems_amc8.js?v=15"></script>
-  <script defer src="problems_amc10.js?v=15"></script>
-  <script defer src="problems_amc12.js?v=15"></script>
-  <script defer src="problems_aime.js?v=15"></script>
-  <script defer src="problems_olympiad.js?v=15"></script>
-  <script defer src="diag_items.js?v=15"></script>
-  <script defer src="telemetry.js?v=15"></script>
-  <script defer src="community.js?v=15"></script>
-  <script defer src="app.js?v=15"></script>
-  <script defer src="diag.js?v=15"></script>
+  <script defer src="config.js?v=16"></script>
+  <script defer src="problems.js?v=16"></script>
+  <script defer src="problems_amc8.js?v=16"></script>
+  <script defer src="problems_amc10.js?v=16"></script>
+  <script defer src="problems_amc12.js?v=16"></script>
+  <script defer src="problems_aime.js?v=16"></script>
+  <script defer src="problems_olympiad.js?v=16"></script>
+  <script defer src="problems_more.js?v=16"></script>
+  <script defer src="diag_items.js?v=16"></script>
+  <script defer src="telemetry.js?v=16"></script>
+  <script defer src="community.js?v=16"></script>
+  <script defer src="app.js?v=16"></script>
+  <script defer src="diag.js?v=16"></script>
   <script>document.getElementById("theme").onclick=function(){var d=document.documentElement,cur=d.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),n=cur==="dark"?"light":"dark";d.setAttribute("data-theme",n);try{localStorage.setItem("cp.theme",n)}catch(e){}};</script>
   <script>if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});</script>
 </body>

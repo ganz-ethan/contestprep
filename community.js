@@ -14,6 +14,29 @@
   const myLevel = () => { const h = window.CP.S.diag && window.CP.S.diag.history; return h && h.length ? h[h.length - 1].score : null; };
   const body = t => esc(t).replace(/\n/g, "<br>"); // plain text only: HTML is escaped, $...$ becomes math
 
+  // ============================ progress sync ============================
+  // Combines two copies of progress without losing anything: solved stays solved, counts keep the larger value.
+  function mergeProgress(a, b) {
+    a = a || {}; b = b || {};
+    const out = Object.assign({}, b, a); // local-only settings (share choice etc.) win
+    const att = {}; const ids = new Set([...Object.keys(a.attempts || {}), ...Object.keys(b.attempts || {})]);
+    for (const id of ids) {
+      const x = (a.attempts || {})[id], y = (b.attempts || {})[id];
+      if (!x || !y) { att[id] = x || y; continue; }
+      const base = (x.tries || 0) >= (y.tries || 0) ? x : y, other = base === x ? y : x;
+      att[id] = Object.assign({}, other, base, { tries: Math.max(x.tries || 0, y.tries || 0), solved: !!(x.solved || y.solved), hints: Math.max(x.hints || 0, y.hints || 0) });
+    }
+    out.attempts = att;
+    out.lvl = Object.assign({}, b.lvl || {}, a.lvl || {});
+    const seen = new Set(), hist = [];
+    for (const h of [...((a.diag || {}).history || []), ...((b.diag || {}).history || [])]) if (!seen.has(h.t)) { seen.add(h.t); hist.push(h); }
+    hist.sort((p, q) => p.t - q.t); out.diag = Object.assign({}, b.diag || {}, a.diag || {}, { history: hist });
+    const sa = a.streak || { last: null, n: 0 }, sb2 = b.streak || { last: null, n: 0 };
+    out.streak = (sa.last || "") >= (sb2.last || "") ? sa : sb2;
+    if (a.bank !== undefined || b.bank !== undefined) out.bank = Math.max(a.bank || 0, b.bank || 0);
+    return out;
+  }
+
   // ============================ demo back end (this browser only) ============================
   const demo = (() => {
     const K = "cp.community.demo";
@@ -42,6 +65,8 @@
       async requestFriend(username) { const d = load(); need(d); const u = d.users.find(x => x.username.toLowerCase() === username.toLowerCase()); if (!u) throw new Error("No one has that username."); if (u.id === d.me) throw new Error("That is you."); if (d.friends.some(f => (f.a === d.me && f.b === u.id) || (f.a === u.id && f.b === d.me))) throw new Error("You already have a request or friendship with them."); d.friends.push({ id: "f" + d.n++, a: d.me, b: u.id, status: "pending" }); save(d); },
       async respond(id, accept) { const d = load(); need(d); const f = d.friends.find(x => x.id === id); if (!f) return; if (accept && f.b === d.me) f.status = "accepted"; else d.friends = d.friends.filter(x => x.id !== id); save(d); },
       async removeFriend(id) { const d = load(); d.friends = d.friends.filter(x => x.id !== id); save(d); },
+      async pullProgress() { const d = load(); need(d); return (d.users.find(x => x.id === d.me) || {}).progress || null; },
+      async pushProgress(data) { const d = load(); need(d); d.users.find(x => x.id === d.me).progress = data; save(d); },
     };
   })();
 
@@ -87,6 +112,8 @@
       async requestFriend(username) { await needTok(); const cand = await rest("profiles?username=ilike." + encodeURIComponent(username.replace(/[%*]/g, "")) + "&select=id,username&limit=20"); const u = (cand || []).filter(x => x.username.toLowerCase() === username.toLowerCase()); /* ilike treats _ as a wildcard, so confirm an exact match */ if (!u[0]) throw new Error("No one has that username."); if (u[0].id === getS().uid) throw new Error("That is you."); await rest("friendships", { method: "POST", body: { addressee_id: u[0].id } }); },
       async respond(id, accept) { await needTok(); if (accept) await rest("friendships?id=" + eq(id), { method: "PATCH", body: { status: "accepted" } }); else await rest("friendships?id=" + eq(id), { method: "DELETE" }); },
       async removeFriend(id) { await needTok(); await rest("friendships?id=" + eq(id), { method: "DELETE" }); },
+      async pullProgress() { await needTok(); const r = await rest("user_data?user_id=" + eq(getS().uid) + "&select=data"); return r && r[0] ? r[0].data : null; },
+      async pushProgress(data) { await needTok(); await rest("user_data?on_conflict=user_id", { method: "POST", body: { user_id: getS().uid, data, updated_at: new Date().toISOString() }, headers: { Prefer: "resolution=merge-duplicates" } }); },
     };
   })();
 
@@ -106,9 +133,17 @@
       show(`<h1>Account</h1>${demoBanner()}${nav()}
         <div class="card"><p>Signed in as <b>${esc(me.username)}</b>${me.level ? ` · level ${me.level} shown on your profile` : ""}.</p>
         <label class="row"><input type="checkbox" id="showlv" ${me.level ? "checked" : ""} ${lv ? "" : "disabled"}> <span>Show my diagnostic level (${lv ? lv : "take the diagnostic first"}) next to my name</span></label>
-        <p class="sub">Your practice progress still lives only in this browser. Your account is used for the forum and friends.</p>
+        <p class="sub">Your practice progress is kept in this browser. Use "Sync progress" to save a copy to your account and merge it with other devices. Nothing is shared with other people.</p>
+        <p><button class="btn" id="sync">Sync progress</button></p>
         <p style="margin-top:12px"><button class="btn ghost" id="out">Sign out</button></p><p id="m" role="status"></p></div>`);
       const cb = $("showlv"); if (cb) cb.onchange = async () => { try { await B.setLevel(cb.checked ? lv : null); msg("m", "Saved.", false); } catch (e) { msg("m", friendlyErr(e), true); } };
+      $("sync").onclick = async () => { const btn = $("sync"); btn.disabled = true; try {
+          const remote = await B.pullProgress(), CPs = window.CP.S, merged = mergeProgress(CPs, remote);
+          for (const k of Object.keys(CPs)) delete CPs[k]; Object.assign(CPs, merged); window.CP.persist();
+          const copy = JSON.parse(JSON.stringify(merged)); delete copy.share; await B.pushProgress(copy);
+          const n = Object.values(merged.attempts || {}).filter(a => a.solved).length + Object.keys(merged.lvl || {}).length;
+          msg("m", "Synced. " + n + (n === 1 ? " solved problem is" : " solved problems are") + " saved to your account and on this device.", false);
+        } catch (e) { msg("m", friendlyErr(e), true); } btn.disabled = false; };
       $("out").onclick = async () => { await B.signOut(); viewAccount(); };
       return;
     }
@@ -194,6 +229,6 @@
       if (a === "t") return viewThread(decodeURIComponent(b || ""));
       return viewForum();
     },
-    _test: { demo, sb, CATS },
+    _test: { demo, sb, CATS, mergeProgress },
   };
 })();

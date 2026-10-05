@@ -75,7 +75,20 @@ create table public.reports (
   created_at timestamptz not null default now()
 );
 
+-- Synced practice progress: one private row per person.
+create table public.user_data (
+  user_id uuid primary key default auth.uid() references public.profiles(id) on delete cascade,
+  data jsonb not null check (pg_column_size(data) < 2000000),
+  updated_at timestamptz not null default now()
+);
+
 -- ---------- row-level security ----------
+alter table public.user_data enable row level security;
+create policy "own progress read"   on public.user_data for select using (auth.uid() = user_id);
+create policy "own progress insert" on public.user_data for insert with check (auth.uid() = user_id);
+create policy "own progress update" on public.user_data for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own progress delete" on public.user_data for delete using (auth.uid() = user_id);
+
 alter table public.profiles enable row level security;
 alter table public.threads enable row level security;
 alter table public.posts enable row level security;

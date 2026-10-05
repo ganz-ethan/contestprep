@@ -45,6 +45,7 @@ The "Mistakes" line on the About page links to this repo's GitHub Issues page. S
 | `problems_aime.js`, `problems_olympiad.js` | AIME (integer answers 0 to 999) and proof problems |
 | `extra2_gen.txt`, `extra2_ck.txt`, `add_top_skills.js` | Source snippets used once to add skills (already merged into diag_items.js and verify_diag2.js). |
 | `community.js`, `community/` | Accounts, friends and forum. Demo mode (this browser only) until a Supabase project is connected; see `community/README.md`. `node test_community.js` checks the real back end's requests. |
+| `problems_more.js` | 26 more original AMC 8 / 10 / 12 problems, each answer recomputed in `verify.js`. |
 | `sw.js` | Offline support (network first, falls back to the last copy). Progress page also has backup and restore buttons. |
 | `diag_items.js` | Diagnostic and practice bank: 13 levels x 1,500 generated items (300 in each of 5 subjects) = 19,500, from 299 question types, with answer checking |
 | `diag.js` | Adaptive test engine, results report, per-level practice pages |
