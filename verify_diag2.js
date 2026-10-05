@@ -213,6 +213,17 @@ ck(1300,"Power of 2 mod 1000",(q,N)=>powmod(2,N[1],1000));
 ck(1300,"Divisibility count",(q,N)=>{const m=q.match(/1\\le n\\le(\d+)\$ is \$n\(n\+1\)\(n\+2\)\$ divisible by (\d+)/);let c=0;for(let n=1;n<=+m[1];n++)if(n*(n+1)*(n+2)%+m[2]===0)c++;return c;});
 ck(1300,"Pairs with LCM equal to N",(q)=>{const n=+q.match(/lcm\}\(a,b\)=(\d+)/)[1];const d=divisors(n);let c=0;for(const a of d)for(const b of d)if(lcm(a,b)===n)c++;return c;});
 
+// ---- extra top-tier skills ----
+ck(1100,"Triangle area from coordinates",(q,N)=>{const [a,b,c,d,e,f]=N;let s=0;const P=[[a,b],[c,d],[e,f]];for(let i=0;i<3;i++){const [x1,y1]=P[i],[x2,y2]=P[(i+1)%3];s+=x1*y2-x2*y1;}return Math.abs(s)/2;});
+ck(1100,"Trailing zeros of a factorial",(q,N)=>{const s=factorial(N[0]).toString();let z=0;for(let i=s.length-1;s[i]==="0";i--)z++;return z;});
+ck(1100,"Round-table seating, two together",(q,N)=>{const n=N[0];return Number(factorial(n-1)*2n/BigInt(n-1));});
+ck(1200,"Digit sum of a power of 2",(q,N)=>{let d=[1];for(let i=0;i<N[1];i++){let c=0;for(let j=0;j<d.length;j++){const x=d[j]*2+c;d[j]=x%10;c=Math.floor(x/10);}if(c)d.push(c);}return sum(d);});
+ck(1200,"Sum of digit sums up to N",(q,N)=>{const n=N[1];let s=0;for(let p=1;p<=n;p*=10){const hi=Math.floor(n/(10*p)),cur=Math.floor(n/p)%10,lo=n%p;s+=hi*45*p+cur*(cur-1)/2*p+cur*(lo+1);}return s;});
+ck(1200,"Bounded distribution",(q,N)=>{const [n,k,m]=N;let dp=[1];for(let i=0;i<k;i++){const nx=new Array(dp.length+m).fill(0);for(let s=0;s<dp.length;s++)for(let x=0;x<=m;x++)nx[s+x]+=dp[s];dp=nx;}return dp[n]||0;});
+ck(1300,"Lattice points strictly inside a triangle",(q,N)=>{const [,,a,b,c,d]=N;const lo=Math.min(0,a,c),hi=Math.max(0,a,c),lo2=Math.min(0,b,d),hi2=Math.max(0,b,d);const cr=(px,py,qx,qy,x,y)=>(qx-px)*(y-py)-(qy-py)*(x-px);let cnt=0;for(let x=lo;x<=hi;x++)for(let y=lo2;y<=hi2;y++){const s1=cr(0,0,a,b,x,y),s2=cr(a,b,c,d,x,y),s3=cr(c,d,0,0,x,y);if((s1>0&&s2>0&&s3>0)||(s1<0&&s2<0&&s3<0))cnt++;}return cnt;});
+ck(1300,"Onto functions (gifts to children)",(q,N)=>{const [n,m]=N;let cnt=0;const tot=m**n;for(let code=0;code<tot;code++){let x=code,mask=0;for(let i=0;i<n;i++){mask|=1<<(x%m);x=Math.floor(x/m);}if(mask===(1<<m)-1)cnt++;}return cnt;});
+ck(1300,"Digit sum of 10^n minus m",(q,N)=>{const n=N[1],m=N[2];const s=(10n**BigInt(n)-BigInt(m)).toString();let t=0;for(const ch of s)t+=+ch;return t;});
+
 // ================= run =================
 const close = (a, b) => Math.abs(a - b) <= 1e-8 * Math.max(1, Math.abs(b));
 let checked = 0, bad = 0, unchecked = new Set(); const perSkill = {}; const t0 = Date.now();

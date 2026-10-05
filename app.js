@@ -434,7 +434,7 @@
       <h2>About the diagnostic score</h2>
       <p>The 100 to 1300 scale comes from the difficulty built into this site's problems, not from a national sample of students, so read it as a precise relative measure rather than an official grade equivalent. Every report shows its margin of error. As real students use it, the difficulty numbers can be recalibrated.</p>
       <h2>Mistakes</h2>
-      <p>Found a wrong answer or an unclear problem? Please tell whoever runs this site, with the problem number shown in the page address.</p>`);
+      <p>Found a wrong answer or an unclear problem? Please <a href="https://github.com/ganz-ethan/contestprep/issues/new" target="_blank" rel="noopener">report it on GitHub</a> (a free GitHub account is needed) and include the problem number shown in the page address.</p>`);
   }
 
   // ---------- roadmap ----------

@@ -120,10 +120,10 @@
     show(`
       <div class="row" style="justify-content:space-between"><h1 style="margin:0">Question ${n + 1}</h1>
         <span class="sub">${n >= 15 ? `<button class="btn small ghost" id="early">Finish early</button>` : ""}</span></div>
-      <div class="bar" style="margin:10px 0 16px"><i style="width:${Math.round(frac * 100)}%"></i></div>
+      <div class="bar" role="progressbar" aria-label="Diagnostic progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(frac * 100)}" style="margin:10px 0 16px"><i style="width:${Math.round(frac * 100)}%"></i></div>
       <div class="problem" style="font-size:1.15rem">${it.q}</div>
       <div class="row" style="margin:14px 0">
-        <input id="ans" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer" style="width:12em" autofocus>
+        <input id="ans" aria-label="Your answer" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer" style="width:12em" autofocus>
         <button class="btn" id="go">Submit</button>
         <button class="btn ghost" id="dk">I don't know</button>
       </div>
@@ -231,7 +231,7 @@
       const it = gen(L, idx), pos = ks.indexOf(idx);
       body = `<div class="card" style="margin:14px 0"><div>${pill(STRAND_NAME[it.strand])}${pill(it.skill)} <span class="sub" style="font-size:.85rem">Problem ${pos + 1} of ${ks.length}</span></div>
         <div class="problem" style="margin:10px 0">${it.q}</div>
-        <div class="row"><input id="ans" type="text" autocomplete="off" placeholder="Your answer" style="width:12em">
+        <div class="row"><input id="ans" aria-label="Your answer" type="text" autocomplete="off" placeholder="Your answer" style="width:12em">
         <button class="btn" id="chk">Check</button><button class="btn ghost" id="rev">Show answer</button></div>
         <div id="fb"></div></div>`;
     }
