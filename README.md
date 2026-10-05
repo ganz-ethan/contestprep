@@ -43,8 +43,9 @@ The "Mistakes" line on the About page links to this repo's GitHub Issues page. S
 | `problems.js` | Track definitions, topic names, first problems, and the `M(...)` helper for multiple choice |
 | `problems_amc8.js`, `problems_amc10.js`, `problems_amc12.js` | Multiple-choice problems |
 | `problems_aime.js`, `problems_olympiad.js` | AIME (integer answers 0 to 999) and proof problems |
+| `extra2_gen.txt`, `extra2_ck.txt`, `add_top_skills.js` | Source snippets used once to add skills (already merged into diag_items.js and verify_diag2.js). |
 | `sw.js` | Offline support (network first, falls back to the last copy). Progress page also has backup and restore buttons. |
-| `diag_items.js` | Diagnostic and practice bank: 13 levels x 1,500 generated items (300 in each of 5 subjects) = 19,500, from 292 question types, with answer checking |
+| `diag_items.js` | Diagnostic and practice bank: 13 levels x 1,500 generated items (300 in each of 5 subjects) = 19,500, from 299 question types, with answer checking |
 | `diag.js` | Adaptive test engine, results report, per-level practice pages |
 | `config.js`, `telemetry.js` | Logging switch (off by default) and the opt-in anonymous logger |
 | `collector/` | Free Google Sheets collector, plus a local test collector |
@@ -76,7 +77,7 @@ Run these from this folder with Node:
 node verify.js         # bank structure, plus 40 multiple-choice answers recomputed by brute force
 node verify_aime.js    # all 60 AIME answers recomputed by brute force
 node verify_diag.js    # all 19,500 diagnostic items: generate, exact answers, valid ids, balanced subjects, no repeats
-node verify_diag2.js   # ALL 292 diagnostic question types re-derived independently from the question text (fails if a type has no checker)
+node verify_diag2.js   # ALL 299 diagnostic question types re-derived independently from the question text (fails if a type has no checker)
 node mutation_test.js  # plants deliberate bugs and confirms verify_diag2.js catches every one
 node report_distinct.js [--templates]  # how many distinct questions each level x subject really has
 node print_skills.js [level]           # one sample question per question type, for reading the wording
@@ -88,7 +89,7 @@ Run `verify.js` and `verify_aime.js` after adding contest problems, and `verify_
 
 ## The diagnostic and practice bank
 
-Every level (100 to 1300) has **1,500 problems: 300 in each of five subjects** (arithmetic and sequences, algebra, geometry, counting and probability, number theory), listed easiest to hardest. Problems are generated from **292 question types** ("skills"); each problem's answer is computed from its own numbers, never typed. Item `L800-0037` is always the same problem.
+Every level (100 to 1300) has **1,500 problems: 300 in each of five subjects** (arithmetic and sequences, algebra, geometry, counting and probability, number theory), listed easiest to hardest. Problems are generated from **299 question types** ("skills"); each problem's answer is computed from its own numbers, never typed. Item `L800-0037` is always the same problem.
 
 Variety comes from three places: many distinct skills per level and subject, wide number ranges, and everyday contexts (names, objects) in word problems. 19,464 of the 19,500 questions are distinct; a few repeat where a skill's possible values run out. `report_distinct.js` shows where.
 
@@ -108,7 +109,7 @@ What a consenting visitor sends: a random session code (new for every diagnostic
    node calibrate.js responses.csv        # writes calibration.json and prints a report
    ```
 
-   Because the bank has 19,500 items, calibration fits **one difficulty shift per skill** (292 skills) rather than per item. A skill needs about 40 answers before it moves; skills with less data keep their design difficulty, and no skill moves more than 150 points. Redeploy with the new `calibration.json` next to `index.html`; the diagnostic loads it automatically. The report also flags **skills that look broken** (answers stay unexplained after refitting, often a wrong answer key or ambiguous wording), individual items that stay unexplained when enough data exists, and contest problems with the lowest first-try rates.
+   Because the bank has 19,500 items, calibration fits **one difficulty shift per skill** (299 skills) rather than per item. A skill needs about 40 answers before it moves; skills with less data keep their design difficulty, and no skill moves more than 150 points. Redeploy with the new `calibration.json` next to `index.html`; the diagnostic loads it automatically. The report also flags **skills that look broken** (answers stay unexplained after refitting, often a wrong answer key or ambiguous wording), individual items that stay unexplained when enough data exists, and contest problems with the lowest first-try rates.
 
 `node test_calibrate.js` checks the whole method on synthetic students: with 3,500 sessions it roughly halves the error in skill difficulty (39 to 19 points) and flags all planted broken skills with no false alarms.
 

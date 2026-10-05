@@ -1,0 +1,9 @@
+
+// ---- more skills for the thinnest levels ----
+ck(1000,"Chord length from distance",(q,N)=>2*Math.sqrt(N[0]*N[0]-N[1]*N[1]));
+ck(1000,"Divisible by a or b",(q,N)=>{const [a,b,n]=[N[1],N[2],N[0]];let c=0;for(let k=1;k<=n;k++)if(k%a===0||k%b===0)c++;return c;});
+ck(1000,"Term of an arithmetic sequence from two terms",(q,N)=>{const [p,tp,qq,tq,w]=[N[0],N[1],N[2],N[3],N[4]];return tp+(tq-tp)/(qq-p)*(w-p);});
+ck(1200,"Lattice paths through a point",(q,N)=>{const [,,a,b,c,d]=N;const f=(x,y)=>{const g=Array.from({length:x+1},()=>new Array(y+1).fill(0));g[0][0]=1;for(let i=0;i<=x;i++)for(let j=0;j<=y;j++){if(i)g[i][j]+=g[i-1][j];if(j)g[i][j]+=g[i][j-1];}return g[x][y];};return f(c,d)*f(a-c,b-d);});
+ck(1300,"Lattice paths avoiding a point",(q,N)=>{const [,,a,b,c,d]=N;const g=Array.from({length:a+1},()=>new Array(b+1).fill(0));g[0][0]=1;for(let i=0;i<=a;i++)for(let j=0;j<=b;j++){if(i===c&&j===d){g[i][j]=0;continue;}if(i)g[i][j]+=g[i-1][j];if(j)g[i][j]+=g[i][j-1];}return g[a][b];});
+ck(1300,"Divisors of n squared below n",(q,N)=>{const n=N[0],sq=n*n;let c=0;for(const d of divisors(sq))if(d<n)c++;return c;});
+ck(1300,"Telescoping sum of 1/(k(k+2))",(q,N)=>{const n=N[1];let s=0;for(let k=1;k<=n;k++)s+=1/(k*(k+2));return s;});

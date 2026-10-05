@@ -78,7 +78,7 @@
     if (page === "progress") return viewProgress();
     if (page === "review") return viewReview();
     if (page === "about") return viewAbout();
-    if ((page === "diag" || page === "level") && window.DiagUI) return window.DiagUI.route(page, arg, location.hash.split("/")[3]);
+    if ((page === "diag" || page === "level" || page === "print") && window.DiagUI) return window.DiagUI.route(page, arg, location.hash.split("/")[3]);
     return viewHome();
   }
   // shared helpers for other modules (diag.js)

@@ -240,7 +240,7 @@
       <h1>Level ${L}: ${esc(LEVEL_NAME[L])}</h1>
       <p class="sub">${PL().toLocaleString()} problems at this level: 300 in each of five subjects, easiest to hardest. ${total} solved.</p>
       <div class="row" style="margin:8px 0">${levelChips}</div>${bar(total, PL())}
-      <div class="row" id="fl" style="margin:12px 0">${fchips} <button class="btn small ghost" id="rnd" title="A random problem you have not solved yet">Random unsolved</button></div>
+      <div class="row" id="fl" style="margin:12px 0">${fchips} <button class="btn small ghost" id="rnd" title="A random problem you have not solved yet">Random unsolved</button> <a class="btn small ghost" href="#/print/${L}/${strandFilter}">Print worksheet</a></div>
       ${body}${pageChips}
       <div class="cells">${cells.join("")}</div>`);
     const unsolved = () => ks.filter(k => !S.lvl[idOf(L, k)]);
@@ -267,9 +267,27 @@
     }
   }
 
+  function viewPrint(levelArg, strandArg) {
+    const L = LEVELS.includes(+levelArg) ? +levelArg : 700, st = STRANDS.includes(strandArg) ? strandArg : "all";
+    const pool = []; for (let k = 0; k < PL(); k++) if (st === "all" || STRANDS[k % 5] === st) pool.push(k);
+    const unsolved = pool.filter(k => !S.lvl[idOf(L, k)]), src = unsolved.length >= 20 ? unsolved : pool;
+    for (let i = src.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [src[i], src[j]] = [src[j], src[i]]; }
+    const items = src.slice(0, 20).sort((a, b) => a - b).map(k => gen(L, k));
+    const title = `Level ${L} worksheet${st === "all" ? "" : ": " + STRAND_NAME[st]}`;
+    show(`<div class="noprint crumbs"><a href="#/level/${L}">Back to level ${L}</a></div>
+      <div class="noprint row" style="margin:8px 0"><button class="btn" id="doprint">Print worksheet</button> <button class="btn ghost" id="reshuffle">New set of 20</button></div>
+      <h1>${esc(title)}</h1><p class="sub">Name: ______________________ &nbsp; Date: ____________ &nbsp; Score: ____ / 20</p>
+      <ol class="ws">${items.map(it => `<li><div class="problem">${it.q}</div><div class="wsgap"></div></li>`).join("")}</ol>
+      <div class="pagebreak"></div><h2>Answer key</h2>
+      <ol class="ws key">${items.map(it => `<li><b>${esc(it.show)}</b></li>`).join("")}</ol>`);
+    document.getElementById("doprint").onclick = () => window.print();
+    document.getElementById("reshuffle").onclick = () => viewPrint(L, st);
+  }
+
   window.DiagUI = {
     route(page, arg, arg2) {
       if (page === "level") return viewLevel(arg, arg2);
+      if (page === "print") return viewPrint(arg, arg2);
       if (arg === "run") return viewRun();
       if (arg === "result") return viewResult(arg2);
       return viewIntro();
