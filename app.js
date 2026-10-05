@@ -82,11 +82,12 @@
     if ((page === "diag" || page === "level" || page === "print") && window.DiagUI) return window.DiagUI.route(page, arg, location.hash.split("/")[3]);
     return viewHome();
   }
+  const routeAndFocus = () => { route(); wireSearch(); const h = $app.querySelector("h1"); if (h) { h.setAttribute("tabindex", "-1"); if (!/^#\/(diag\/run|mock|problem)/.test(location.hash) ) h.focus({ preventScroll: true }); } };
   // shared helpers for other modules (diag.js)
   window.CP = { show, esc, fmt, pill, bar, S, persist, touchStreak, dayKey, shareCard };
-  window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
-  window.addEventListener("load", route);
-  if (document.readyState === "complete") route();
+  window.addEventListener("hashchange", () => { routeAndFocus(); window.scrollTo(0, 0); });
+  window.addEventListener("load", routeAndFocus);
+  if (document.readyState === "complete") routeAndFocus();
 
   // ---------- home ----------
   function viewHome() {
@@ -121,10 +122,20 @@
             <a class="btn small ghost" href="#/level/${Math.max(100, Math.min(1300, Math.floor(lastD.score / 100) * 100))}">Practice your level</a></div>` : "") +
           (due ? `<div class="card" style="margin-bottom:12px"><b>${due} problem${due === 1 ? "" : "s"} ready to review</b> <a class="btn small" style="margin-left:8px" href="#/review">Review now</a></div>` : ""); })()}
       ${shareCard()}
+      <div style="margin:14px 0"><input type="search" id="q" aria-label="Search problems" placeholder="Search problems by topic, tag, or words (try: lcm, triangle, aime)" style="width:100%;max-width:560px"><div id="qres" role="status" aria-live="polite"></div></div>
       <h2>Choose a track</h2>
       <div class="grid">${cards}</div>
       <h2>Not sure where to start?</h2>
       <p>Read the <a href="#/roadmap">roadmap</a>. It tells you which track fits your level and what to study next.</p>`);
+  }
+
+  function wireSearch() {
+    const q = document.getElementById("q"), out = document.getElementById("qres"); if (!q) return;
+    q.oninput = () => {
+      const terms = q.value.toLowerCase().split(/\s+/).filter(Boolean); if (!terms.length) { out.innerHTML = ""; return; }
+      const hit = PROBLEMS.filter(p => { const hay = (p.id + " " + p.track + " " + (TOPICS[p.topic] || p.topic) + " " + (p.tags || []).join(" ") + " " + p.q).toLowerCase(); return terms.every(t => hay.includes(t)); });
+      out.innerHTML = hit.length ? `<p class="sub">${hit.length} match${hit.length === 1 ? "" : "es"}${hit.length > 12 ? " (showing 12)" : ""}</p><ul class="srch">${hit.slice(0, 12).map(p => `<li><a href="#/problem/${esc(p.id)}">${esc(TRACKS[p.track] ? TRACKS[p.track].name || p.track : p.track)} · ${esc(TOPICS[p.topic] || p.topic)} · difficulty ${p.diff}</a><div class="sub">${esc(p.q.replace(/\$/g, "").slice(0, 110))}…</div></li>`).join("")}</ul>` : `<p class="sub">No problems match. Try a shorter word.</p>`;
+    };
   }
 
   // ---------- track ----------
