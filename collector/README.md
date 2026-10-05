@@ -11,7 +11,7 @@ One row per problem a consenting visitor answered:
 | `day` | the date the server received it (no time of day) |
 | `kind` | `diag` (a finished diagnostic) or `prac` (practice problems) |
 | `sid` | a random code, new for every diagnostic and for every browser tab session, not stored afterwards |
-| `item` | problem id, such as `L800-37` or `a10-12` |
+| `item` | problem id, such as `L800-0037` or `a10-12` |
 | `ok` | 1 if the **first** try was correct, otherwise 0 |
 | `hints` | hints used before that first try, 0 to 3 |
 

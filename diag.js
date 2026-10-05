@@ -5,9 +5,16 @@
 
   // Refit item difficulties (produced by calibrate.js from collected anonymous data) override the design values.
   // calibration.json is optional; if it is missing or empty the built-in design difficulties are used.
-  fetch("calibration.json", { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).then(j => { if (j && j.items) window.DIAG.setCalibration(j); }).catch(() => {});
+  fetch("calibration.json", { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).then(j => { if (j && (j.items || j.groups)) window.DIAG.setCalibration(j); }).catch(() => {});
   S.diag = S.diag || { history: [] };
   S.lvl = S.lvl || {};
+  // Item numbering changed when each level grew from 100 to 1,500 items (ids went from L800-37 to L800-0037), so ids saved
+  // under the old scheme would now point at different problems. Keep old scores, drop the per-item records tied to old ids.
+  if (S.bank !== 2) {
+    S.lvl = {}; delete S.diagRun;
+    S.diag.history.forEach(h => { h.items = []; });
+    S.bank = 2; persist();
+  }
 
   // ---------- item response model ----------
   // P(correct | ability th, item difficulty b) = g + (1 - g - slip) * logistic((th - b) / W)
@@ -29,7 +36,7 @@
     const sdv = Math.sqrt(GRID.reduce((s, th, i) => s + (th - mean) ** 2 * w[i], 0) / Z);
     return { mean, sd: sdv };
   }
-  const itemById = id => gen(parseInt(id.slice(1), 10), parseInt(id.split("-")[1], 10));
+  const itemById = id => { const p = window.DIAG.parseId(id); return p ? gen(p.level, p.k) : null; };
   const respOf = run => run.ids.map((id, i) => { const it = itemById(id); return { b: it.b, ok: run.ok[i], strand: it.strand }; });
   const estimate = run => posterior(respOf(run), run.mu, 350);
 
@@ -44,10 +51,14 @@
     const strand = pool[Math.floor(Math.random() * pool.length)];
     const target = posterior(resp, est.mean, 200, r => r.strand === strand).mean; // ability in THIS strand (shrunk toward overall)
     const used = new Set(run.ids), cands = [];
-    for (const L of LEVELS) for (let k = STRANDS.indexOf(strand); k < 100; k += 5) {
-      const it = gen(L, k); if (used.has(it.id)) continue;
-      cands.push({ it, d: Math.abs(it.b - target) });
+    // only the levels near the target need to be searched (and therefore generated)
+    for (const L of LEVELS) { if (L + 100 < target - 250 || L > target + 250) continue;
+      for (let k = STRANDS.indexOf(strand); k < window.DIAG.PER_LEVEL; k += 5) {
+        const it = gen(L, k); if (used.has(it.id)) continue;
+        cands.push({ it, d: Math.abs(it.b - target) });
+      }
     }
+    if (!cands.length) for (const L of LEVELS) for (let k = STRANDS.indexOf(strand); k < window.DIAG.PER_LEVEL; k += 5) { const it = gen(L, k); if (!used.has(it.id)) cands.push({ it, d: Math.abs(it.b - target) }); }
     cands.sort((a, b) => a.d - b.d);
     return cands[Math.floor(Math.random() * Math.min(3, cands.length))].it.id;
   }
@@ -159,7 +170,7 @@
         <span><b>${x.score}</b> <span class="sub">± ${x.se} · ${esc(dd.text)}, ${dd.pct}% through</span></span></div>
         <div class="bar" style="height:12px"><i style="width:${Math.min(100, x.score / 14)}%"></i></div></div>`; }).join("");
     // skills
-    const items = h.items.map(([id, ok]) => ({ it: itemById(id), ok })).sort((a, b) => a.it.b - b.it.b);
+    const items = (h.items || []).map(([id, ok]) => ({ it: itemById(id), ok })).filter(x => x.it).sort((a, b) => a.it.b - b.it.b);
     const right = items.filter(x => x.ok).map(x => x.it), wrong = items.filter(x => !x.ok).map(x => x.it);
     const top5 = wrong.filter(w => w.b <= h.score + 60).slice(-6); // misses at or below your level are the real gaps
     const SHORT = { N: "Arithmetic", A: "Algebra", G: "Geometry", C: "Counting", T: "Number theory" };
@@ -185,31 +196,40 @@
         <a class="btn ghost" href="#/level/${d.band}" style="margin-left:6px">Practice Level ${d.band}</a>
         ${top5.length ? "" : ""}</div>
 
-      <h2>Skills to work on</h2>
+      ${items.length ? `<h2>Skills to work on</h2>
       <p>${top5.length ? chips(top5) : `<span class="sub">You answered everything at or below your level correctly. Practice the next level up.</span>`}</p>
-      <h2>Skills you showed</h2><p>${chips(right.slice(-14))}</p>
+      <h2>Skills you showed</h2><p>${chips(right.slice(-14))}</p>` : `<p class="note">Skill details are not available for results saved before the problem bank was expanded. Retake the diagnostic to see them.</p>`}
       <div class="row" style="margin-top:20px"><a class="btn ghost" href="#/diag">Retake later</a></div>`);
   }
 
   // ---------- level practice ----------
-  const solvedIn = L => { let c = 0; for (let k = 0; k < 100; k++) if (S.lvl[`L${L}-${String(k).padStart(2, "0")}`]) c++; return c; };
-  let strandFilter = "all";
+  // Each level has PER_LEVEL (1,500) problems: 300 in each of five subjects, easiest to hardest.
+  const idOf = (L, k) => window.DIAG.idOf(L, k);
+  const PL = () => window.DIAG.PER_LEVEL, PAGE = 100;
+  const solvedIn = (L, strand) => { let c = 0; for (let k = 0; k < PL(); k++) { if (strand && STRANDS[k % 5] !== strand) continue; if (S.lvl[idOf(L, k)]) c++; } return c; };
+  let strandFilter = "all", pageIdx = 0;
+  const keysFor = () => { const ks = []; for (let k = 0; k < PL(); k++) if (strandFilter === "all" || STRANDS[k % 5] === strandFilter) ks.push(k); return ks; };
 
   function viewLevel(levelArg, idxArg) {
     const L = LEVELS.includes(+levelArg) ? +levelArg : 700;
-    const idx = idxArg === undefined ? null : Math.max(0, Math.min(99, +idxArg));
-    const chips = LEVELS.map(l => `<a class="btn small ${l === L ? "" : "ghost"}" href="#/level/${l}">${l}</a>`).join(" ");
-    const fchips = [["all", "All"], ...STRANDS.map(s => [s, STRAND_NAME[s]])].map(([k, n]) => `<button class="btn small ${strandFilter === k ? "" : "ghost"}" data-f="${k}">${esc(n)}</button>`).join(" ");
-    const cells = [];
-    for (let k = 0; k < 100; k++) {
-      const it = gen(L, k); if (strandFilter !== "all" && it.strand !== strandFilter) continue;
-      const done = S.lvl[it.id];
-      cells.push(`<a class="cell ${done ? "done" : ""} ${k === idx ? "cur" : ""}" href="#/level/${L}/${k}" title="${esc(it.skill)}">${k + 1}</a>`);
-    }
+    let idx = idxArg === undefined ? null : Math.max(0, Math.min(PL() - 1, +idxArg));
+    if (idx !== null && strandFilter !== "all" && STRANDS[idx % 5] !== strandFilter) strandFilter = STRANDS[idx % 5]; // show the subject of the open problem
+    const ks = keysFor(), pages = Math.max(1, Math.ceil(ks.length / PAGE));
+    if (idx !== null) pageIdx = Math.floor(ks.indexOf(idx) / PAGE);
+    pageIdx = Math.max(0, Math.min(pages - 1, pageIdx));
+    const total = solvedIn(L), levelChips = LEVELS.map(l => `<a class="btn small ${l === L ? "" : "ghost"}" href="#/level/${l}">${l}</a>`).join(" ");
+    const fchips = [["all", "All subjects"], ...STRANDS.map(s => [s, STRAND_NAME[s]])].map(([k, n]) =>
+      `<button class="btn small ${strandFilter === k ? "" : "ghost"}" data-f="${k}">${esc(n)}${k === "all" ? "" : ` <span style="opacity:.7">${solvedIn(L, k)}/300</span>`}</button>`).join(" ");
+    const pageChips = pages > 1 ? `<div class="row" id="pg" style="margin:6px 0">${Array.from({ length: pages }, (_, p) =>
+      `<button class="btn small ${p === pageIdx ? "" : "ghost"}" data-p="${p}">${p * PAGE + 1}–${Math.min((p + 1) * PAGE, ks.length)}</button>`).join(" ")}</div>` : "";
+    const cells = ks.slice(pageIdx * PAGE, (pageIdx + 1) * PAGE).map((k, i) => {
+      const it = gen(L, k), done = S.lvl[it.id];
+      return `<a class="cell ${done ? "done" : ""} ${k === idx ? "cur" : ""}" href="#/level/${L}/${k}" title="${esc(it.skill)}">${pageIdx * PAGE + i + 1}</a>`;
+    });
     let body = "";
     if (idx !== null) {
-      const it = gen(L, idx);
-      body = `<div class="card" style="margin:14px 0"><div>${pill(STRAND_NAME[it.strand])}${pill(it.skill)} <span class="sub" style="font-size:.85rem">Problem ${idx + 1} of 100</span></div>
+      const it = gen(L, idx), pos = ks.indexOf(idx);
+      body = `<div class="card" style="margin:14px 0"><div>${pill(STRAND_NAME[it.strand])}${pill(it.skill)} <span class="sub" style="font-size:.85rem">Problem ${pos + 1} of ${ks.length}</span></div>
         <div class="problem" style="margin:10px 0">${it.q}</div>
         <div class="row"><input id="ans" type="text" autocomplete="off" placeholder="Your answer" style="width:12em">
         <button class="btn" id="chk">Check</button><button class="btn ghost" id="rev">Show answer</button></div>
@@ -218,15 +238,21 @@
     show(`
       <div class="crumbs"><a href="#/diag">Diagnostic</a> / Levels</div>
       <h1>Level ${L}: ${esc(LEVEL_NAME[L])}</h1>
-      <p class="sub">100 problems, easiest to hardest across five subjects. ${solvedIn(L)} / 100 solved.</p>
-      <div class="row" style="margin:8px 0">${chips}</div>${bar(solvedIn(L), 100)}
-      <div class="row" id="fl" style="margin:12px 0">${fchips}</div>
-      ${body}
+      <p class="sub">${PL().toLocaleString()} problems at this level: 300 in each of five subjects, easiest to hardest. ${total} solved.</p>
+      <div class="row" style="margin:8px 0">${levelChips}</div>${bar(total, PL())}
+      <div class="row" id="fl" style="margin:12px 0">${fchips} <button class="btn small ghost" id="rnd" title="A random problem you have not solved yet">Random unsolved</button></div>
+      ${body}${pageChips}
       <div class="cells">${cells.join("")}</div>`);
-    document.getElementById("fl").onclick = e => { const b = e.target.closest("button"); if (b) { strandFilter = b.dataset.f; viewLevel(L, idxArg); } };
+    const unsolved = () => ks.filter(k => !S.lvl[idOf(L, k)]);
+    document.getElementById("fl").onclick = e => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (b.id === "rnd") { const u = unsolved(); const pick = (u.length ? u : ks)[Math.floor(Math.random() * (u.length ? u.length : ks.length))]; location.hash = `#/level/${L}/${pick}`; return; }
+      strandFilter = b.dataset.f; pageIdx = 0; viewLevel(L, undefined);
+    };
+    const pg = document.getElementById("pg"); if (pg) pg.onclick = e => { const b = e.target.closest("button"); if (b) { pageIdx = +b.dataset.p; viewLevel(L, idxArg); } };
     if (idx !== null) {
       const it = gen(L, idx), fb = document.getElementById("fb"), inp = document.getElementById("ans");
-      const nextK = () => { for (let j = 1; j <= 100; j++) { const k = (idx + j) % 100, x = gen(L, k); if ((strandFilter === "all" || x.strand === strandFilter) && !S.lvl[x.id]) return k; } return (idx + 1) % 100; };
+      const nextK = () => { const pos = ks.indexOf(idx); for (let j = 1; j <= ks.length; j++) { const k = ks[(pos + j) % ks.length]; if (!S.lvl[idOf(L, k)]) return k; } return ks[(pos + 1) % ks.length]; };
       const solution = () => `<div class="solution"><b>Answer: ${esc(it.show)}</b><br>${it.sol}</div>`;
       const render = html => { fb.innerHTML = html; if (window.renderMathInElement) renderMathInElement(fb, { delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }], throwOnError: false }); };
       const go = () => {

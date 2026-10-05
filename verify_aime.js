@@ -65,7 +65,9 @@ const files = ["problems.js","problems_amc8.js","problems_amc10.js","problems_am
 const ctx = { console }; vm.createContext(ctx);
 vm.runInContext(files.map(f => fs.readFileSync(f, "utf8")).join("\n") + "\n;globalThis.__P = PROBLEMS;", ctx);
 const P = ctx.__P; let bad = 0, checked = 0;
-const expected = { ...out }; expected["aime-14"] = out["aime-14"].obt;
+const expected = { ...out, ...require("./aime_brute_31_60.js")() }; expected["aime-14"] = out["aime-14"].obt;
+// the 60 AIME ids must be exactly aime-1 .. aime-60, each once
+{ const ids = P.filter(p => p.track === "aime").map(p => p.id).sort(); const want = Array.from({ length: 60 }, (_, i) => "aime-" + (i + 1)).sort(); if (JSON.stringify(ids) !== JSON.stringify(want)) { console.log("AIME ids are not exactly aime-1..aime-60"); bad++; } }
 for (const p of P.filter(p => p.track === "aime")) {
   if (!Number.isInteger(p.answer) || p.answer < 0 || p.answer > 999) { console.log("AIME answer out of range", p.id, p.answer); bad++; }
   if (p.hints.length !== 3) { console.log("needs 3 hints", p.id); bad++; }

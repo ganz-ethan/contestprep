@@ -9,7 +9,7 @@
 //  * Only the FIRST attempt at each problem per session is sent (what calibration needs).
 (() => {
   const endpoint = (window.CP_CONFIG && window.CP_CONFIG.logEndpoint) || "";
-  const VALID = /^(L\d{3,4}-\d{2}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/;
+  const VALID = /^(L\d{3,4}-\d{4}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/;
   const hex = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => b.toString(16).padStart(2, "0")).join("");
   const st = { q: [], seen: new Set(), sid: null };
 

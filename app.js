@@ -416,7 +416,7 @@
     show(`
       <h1>About, privacy, and sources</h1>
       <h2>What this is</h2>
-      <p>A free, no-account practice site for math contests: AMC 8, AMC 10, AMC 12, AIME, and proof-based olympiads (USAJMO, USAMO, USCMO, MOP). It also has an adaptive diagnostic that places you on a 100 to 1300 scale, with 100 practice problems at every level.</p>
+      <p>A free, no-account practice site for math contests: AMC 8, AMC 10, AMC 12, AIME, and proof-based olympiads (USAJMO, USAMO, USCMO, MOP). It also has an adaptive diagnostic that places you on a 100 to 1300 scale, with 1,500 practice problems at every level (300 in each of five subjects).</p>
       <h2>Privacy: nothing leaves your device</h2>
       <ul>
         <li>There are <b>no accounts, no sign-ups, and no passwords</b>.</li>

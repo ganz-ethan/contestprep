@@ -5,7 +5,7 @@
 // Privacy: like the Apps Script collector, it never records IP addresses or headers.
 const http = require("http"), fs = require("fs"), path = require("path");
 const PORT = +(process.argv[2] || 8787), FILE = process.argv[3] || path.join(__dirname, "responses.csv");
-const ID_RE = /^(L\d{3,4}-\d{2}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/, SID_RE = /^[0-9a-f]{8,16}$/;
+const ID_RE = /^(L\d{3,4}-\d{4}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/, SID_RE = /^[0-9a-f]{8,16}$/;
 if (!fs.existsSync(FILE)) fs.writeFileSync(FILE, "day,kind,sid,item,ok,hints\n");
 
 http.createServer((req, res) => {

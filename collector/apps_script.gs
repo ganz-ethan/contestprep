@@ -10,7 +10,7 @@
  * and this script never asks for it. Do not add IP, user-agent, or any identifying column.
  * Columns: day (server date), kind, sid (random per-session code), item (problem id), ok (1/0), hints (0-3).
  */
-var ID_RE = /^(L\d{3,4}-\d{2}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/;
+var ID_RE = /^(L\d{3,4}-\d{4}|a8-\d{1,3}|a10-\d{1,3}|a12-\d{1,3}|aime-\d{1,3}|oly-\d{1,3})$/;
 var SID_RE = /^[0-9a-f]{8,16}$/;
 var MAX_ROWS_PER_POST = 80;
 

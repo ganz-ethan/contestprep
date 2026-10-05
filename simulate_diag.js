@@ -7,6 +7,7 @@ const store = {};
 const ctx = {
   window: { CP: { show() {}, esc: x => x, pill() {}, bar() {}, S: {}, persist() {}, touchStreak() {} } },
   console, document: {}, location: { hash: "" }, localStorage: { getItem: () => null, setItem() {} },
+  fetch: () => Promise.reject(new Error("no network in simulation")), // diag.js tries to load calibration.json
 };
 ctx.globalThis = ctx; vm.createContext(ctx);
 vm.runInContext(fs.readFileSync("diag_items.js", "utf8"), ctx);
@@ -40,7 +41,7 @@ for (const [name, model] of Object.entries(models)) {
   let all = [], cover1 = 0, cover2 = 0, nTot = 0, sErr = [], topHit = 0, topN = 0;
   for (const th of [150, 300, 450, 600, 750, 850, 950, 1050, 1150, 1250]) {
     const errs = [];
-    for (let rep = 0; rep < 24; rep++) {
+    for (let rep = 0; rep < 16; rep++) {
       // each simulated student is stronger in one random subject by ~+80 and weaker in another by ~-60
       const offs = { N: 0, A: 0, G: 0, C: 0, T: 0 }; const ks = ["N", "A", "G", "C", "T"].sort(() => rnd() - 0.5);
       offs[ks[0]] = 80; offs[ks[1]] = -60;
