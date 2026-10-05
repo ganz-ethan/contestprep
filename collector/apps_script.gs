@@ -1,5 +1,5 @@
 /**
- * Anonymous right/wrong collector for PiPeak, as a Google Apps Script web app writing to a Google Sheet.
+ * Anonymous right/wrong collector for Math Olympiad Centre, as a Google Apps Script web app writing to a Google Sheet.
  *
  * Setup: see collector/README.md. Summary:
  *   1. Create a new Google Sheet. Extensions > Apps Script. Paste this file in and save.
@@ -36,5 +36,5 @@ function doPost(e) {
   return ok_('ok');
 }
 
-function doGet() { return ok_('PiPeak collector is running.'); }
+function doGet() { return ok_('Math Olympiad Centre collector is running.'); }
 function ok_(s) { return ContentService.createTextOutput(s); }
