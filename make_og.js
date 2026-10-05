@@ -1,6 +1,6 @@
 // Generates og.png (1200x630 social preview). Run: node make_og.js
 const fs = require("fs"), zlib = require("zlib");
-const W = 1200, H = 630, segs = [[430,150,770,150],[430,150,610,315],[610,315,430,480],[430,480,770,480],[770,150,770,205],[770,480,770,425]], R = 19;
+const W = 1200, H = 630, segs = [[380,190,820,190],[500,190,470,470],[470,470,430,470],[700,190,730,470],[730,470,770,470]], R = 19;
 const dist = (x, y, s) => { const [ax, ay, bx, by] = s, dx = bx - ax, dy = by - ay; const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))); return Math.hypot(x - ax - t * dx, y - ay - t * dy); };
 const raw = Buffer.alloc((W * 3 + 1) * H);
 for (let y = 0; y < H; y++) { raw[y * (W * 3 + 1)] = 0; for (let x = 0; x < W; x++) {
