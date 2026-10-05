@@ -92,3 +92,10 @@ code { background: var(--soft); padding: 1px 6px; border-radius: 4px; }
   body { background: #fff; color: #000; font-size: 12pt; } .wsgap { height: 90px; } .ws li { break-inside: avoid; }
   .pagebreak { height: 0; }
 }
+
+.stack { display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
+input[type=email], input[type=password], textarea { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); width: 100%; }
+textarea { max-width: 640px; resize: vertical; }
+input[type=checkbox] { width: 1.1em; height: 1.1em; }
+.post .problem { overflow-wrap: anywhere; }
+@media print { .post { break-inside: avoid; } }

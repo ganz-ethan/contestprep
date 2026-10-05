@@ -78,6 +78,7 @@
     if (page === "progress") return viewProgress();
     if (page === "review") return viewReview();
     if (page === "about") return viewAbout();
+    if ((page === "forum" || page === "friends" || page === "account") && window.Community) return window.Community.route(page, arg, location.hash.split("/")[3]);
     if ((page === "diag" || page === "level" || page === "print") && window.DiagUI) return window.DiagUI.route(page, arg, location.hash.split("/")[3]);
     return viewHome();
   }
@@ -99,7 +100,7 @@
     const doneToday = S.streak.last === dayKey(new Date());
     show(`
       <h1>Get better at contest math. Free.</h1>
-      <p class="sub">From AMC 8 up to USAMO and MOP. Layered hints, multiple solution ideas, timed mock contests. No account needed.</p>
+      <p class="sub">From AMC 8 up to USAMO and MOP. Layered hints, multiple solution ideas, timed mock contests. No account needed. <a href="#/forum">Join the forum</a>.</p>
       <div class="card" style="margin:16px 0;border-color:var(--accent)">
         <h3>Find your real level</h3>
         <p style="margin:4px 0 10px">An adaptive diagnostic (up to 50 questions) that scores you from 100 (Kindergarten) to 1300 (AIME) and shows your strongest subject.</p>
@@ -440,10 +441,10 @@
     show(`
       <h1>About, privacy, and sources</h1>
       <h2>What this is</h2>
-      <p>A free, no-account practice site for math contests: AMC 8, AMC 10, AMC 12, AIME, and proof-based olympiads (USAJMO, USAMO, USCMO, MOP). It also has an adaptive diagnostic that places you on a 100 to 1300 scale, with 1,500 practice problems at every level (300 in each of five subjects).</p>
-      <h2>Privacy: nothing leaves your device</h2>
+      <p>A free practice site (no account needed to practise) for math contests: AMC 8, AMC 10, AMC 12, AIME, and proof-based olympiads (USAJMO, USAMO, USCMO, MOP). It also has an adaptive diagnostic that places you on a 100 to 1300 scale, with 1,500 practice problems at every level (300 in each of five subjects).</p>
+      <h2>Privacy: practice stays on your device</h2>
       <ul>
-        <li>There are <b>no accounts, no sign-ups, and no passwords</b>.</li>
+        <li><b>Accounts are optional</b> and only used for the forum and friends. You can practise, take the diagnostic, and print worksheets without one. If accounts are switched on, we store a username, your email and a password hash (never shown to anyone), your posts, and your friend list, and nothing about your practice progress. Users must be 13 or older, or have a parent or guardian's OK.</li>
         <li>Your progress, streak, diagnostic history, and review schedule are stored <b>only in this browser</b> (localStorage). We never receive them. Clearing your browser data erases them.</li>
         <li>The site has <b>no analytics, no ads, and no tracking cookies</b>, and it asks for no personal information. That is deliberate: many users are under 13, and collecting almost nothing keeps them safe.</li>
         <li>The only outside requests are to a CDN for the math-rendering library (KaTeX) and fonts, plus the optional anonymous sharing described below (only if you choose it).</li>
