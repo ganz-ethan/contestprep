@@ -409,7 +409,7 @@
           if (!confirm("Replace the progress in this browser with this backup?")) return;
           for (const k of Object.keys(S)) delete S[k];
           Object.assign(S, { attempts: {}, streak: { last: null, n: 0 } }, d); persist(); location.reload();
-        } catch { msg.textContent = "That file is not a Pi Gym backup."; }
+        } catch { msg.textContent = "That file is not a PiPeak backup."; }
       };
       rd.readAsText(f);
     };

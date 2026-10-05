@@ -1,4 +1,4 @@
-# Pi Gym: free math contest practice
+# PiPeak: free math contest practice
 
 A static website (plain HTML, CSS, and JavaScript; no build step, no server, no accounts) for AMC 8, AMC 10, AMC 12, AIME, and proof-based olympiad practice, with an adaptive diagnostic that places you on a 100 to 1300 scale.
 
