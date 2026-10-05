@@ -388,7 +388,31 @@
       <p>🔥 Current streak: <b>${S.streak.n}</b> day${S.streak.n === 1 ? "" : "s"}</p>
       ${weak ? `<p class="note">Your weakest topic right now is <b>${esc(weak.name)}</b> (${Math.round(weak.acc * 100)}% first-try accuracy). Practice more of it.</p>` : ""}
       <table class="t"><tr><th>Topic</th><th>Solved</th><th>First-try (no hints)</th><th></th></tr>${rows}</table>
-      <p style="margin-top:24px"><button class="btn ghost small" id="reset">Reset all progress</button></p>`);
+      <p style="margin-top:24px"><button class="btn ghost small" id="backup">Download backup</button>
+        <button class="btn ghost small" id="restore">Restore from backup</button>
+        <input type="file" id="restoreFile" accept="application/json,.json" hidden aria-label="Backup file">
+        <button class="btn ghost small" id="reset">Reset all progress</button></p>
+      <p class="sub" id="backupMsg" role="status"></p>`);
+    document.getElementById("backup").onclick = () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(S)], { type: "application/json" }));
+      a.download = "contestprep-backup-" + dayKey(new Date()) + ".json"; a.click(); URL.revokeObjectURL(a.href);
+    };
+    document.getElementById("restore").onclick = () => document.getElementById("restoreFile").click();
+    document.getElementById("restoreFile").onchange = ev => {
+      const f = ev.target.files[0], msg = document.getElementById("backupMsg"); if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try {
+          const d = JSON.parse(rd.result);
+          if (!d || typeof d !== "object" || Array.isArray(d) || typeof d.attempts !== "object" || !d.attempts) throw 0;
+          if (!confirm("Replace the progress in this browser with this backup?")) return;
+          for (const k of Object.keys(S)) delete S[k];
+          Object.assign(S, { attempts: {}, streak: { last: null, n: 0 } }, d); persist(); location.reload();
+        } catch { msg.textContent = "That file is not a ContestPrep backup."; }
+      };
+      rd.readAsText(f);
+    };
     document.getElementById("reset").onclick = () => {
       if (confirm("Erase all progress in this browser?")) {
         S.attempts = {}; S.streak = { last: null, n: 0 }; persist(); viewProgress();

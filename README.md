@@ -43,6 +43,7 @@ The "Mistakes" line on the About page links to this repo's GitHub Issues page. S
 | `problems.js` | Track definitions, topic names, first problems, and the `M(...)` helper for multiple choice |
 | `problems_amc8.js`, `problems_amc10.js`, `problems_amc12.js` | Multiple-choice problems |
 | `problems_aime.js`, `problems_olympiad.js` | AIME (integer answers 0 to 999) and proof problems |
+| `sw.js` | Offline support (network first, falls back to the last copy). Progress page also has backup and restore buttons. |
 | `diag_items.js` | Diagnostic and practice bank: 13 levels x 1,500 generated items (300 in each of 5 subjects) = 19,500, from 292 question types, with answer checking |
 | `diag.js` | Adaptive test engine, results report, per-level practice pages |
 | `config.js`, `telemetry.js` | Logging switch (off by default) and the opt-in anonymous logger |

@@ -76,3 +76,6 @@ table.t th, table.t td { border: 1px solid var(--line); padding: 8px 10px; text-
 .cell.cur { outline: 2px solid var(--accent); }
 select { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
 code { background: var(--soft); padding: 1px 6px; border-radius: 4px; }
+
+:focus-visible { outline: 3px solid #f5a623; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
